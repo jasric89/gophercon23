@@ -11,50 +11,25 @@ import (
 )
 
 func main() {
+
 	// curl https://api.github.com/users/ardanlabs > reply.json
-	// JSON File Reply
+	// GoLand: github/reply.json
 	file, err := os.Open("reply.json")
 	if err != nil {
 		log.Fatalf("error: %s", err)
 	}
 	defer file.Close()
-	//data, err := io.ReadAll(file) to read a whole file
-
-	var userInfo struct {
-		Name         string
-		Public_Repos int
-		NumRepos     int `json:"public_repos"` /*This is called a field tag if you dont like the field names in Json
-		  This is what the Azure DevOps SDK is using. */
-	}
-
-	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&userInfo); err != nil {
-		log.Fatalf("error: cant decode Json - %s", err)
-	}
-	fmt.Printf("%v\n", userInfo)
-	fmt.Println("Finshed Reading Json File")
-
-	// URL Reply
-	url := "https://httpbin.org/get"
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Fatalf("error: %s", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("error: bad status - %s", resp.Status)
-	}
-	fmt.Println("content-type:", resp.Header.Get("Content-Type"))
-	if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
-		log.Fatalf("error: cant print body - %s", err)
-	}
+	// data, err := io.ReadAll(file)
 
 	login := "ardanlabs"
 	name, numRepos, err := userInfo(login)
 	if err != nil {
-		log.Fatal("Error: Cant get %q info -s %s", login, err)
+		log.Fatalf("error: can't get %q info - %s", login, err)
 	}
 	fmt.Printf("name: %s, num repos: %d\n", name, numRepos)
 }
+
+// Solving: Get, Parse, Analyze, Output
 
 // userInfo return name and number of public repos from GitHub API.
 func userInfo(login string) (string, int, error) {
@@ -87,44 +62,18 @@ func decodeUserInfo(r io.Reader) (string, int, error) {
 	return userInfo.Name, userInfo.NumRepos, nil
 }
 
-// Solving: Get, Paese, Analyze, Out // LOOK AT LATTEERRRRRRR!!!!! FUCK SAKE!!!! WHY DID YOU NOT GET THIS SHIT!!
-/*
-func userInfo(login string) (string, int, error) {
-	url := "https://api.github.com/orgs/users/" + url.PathEscape(login)
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("error: bad status - %s", url, resp.Status)
-	}
+/* JSON
+JSON <-> Go
+string <-> string
+number <-> float64, int8 ... int64, int, uint8 ... uint64, uint, float32 ..
+true/false <-> true/false
+null <-> nil
+array <-> []T, []any
+object <-> struct, map[string]any
 
-	//	fmt.Println("content-type:", resp.Header.Get("Content-Type"))
-	//	if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
-	//		log.Fatalf("error: cant print body - %s", err)
-	//	}
-	var userInfo struct {
-		Name         string
-		Public_Repos int
-		NumRepos     int `json:"public_repos"`
-	}
-
-	decoder := json.NewDecoder(io.read)
-	if err := decoder.Decode(&userInfo); err != nil {
-		log.Fatalf("error: cant decode Json - %s", err)
-	}
-	fmt.Printf("%v\n", userInfo)
-	fmt.Println("Finshed Reading Json File")
-
-	return decoder, err, int
-}
-*/
-
-/*
-encoding /json API
+encoding/json API
 JSON -> io.Reader -> Go: json.NewDecoder
-go -> io.Writer -> JSON: json.NewEncoder
-JSON -> []byte -> go:json.Marshal
-[]byte -> JSON -> go:json.Unmarshal
-
+Go -> io.Writer -> JSON: json.NewEncoder
+JSON -> []byte -> Go: json.Unmarshal
+Go -> []byte -> JSON: json.Marshal
 */
